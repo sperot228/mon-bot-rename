@@ -23,7 +23,7 @@ START_TEXT = """
 
     ➻ ᴜᴛɪʟɪsᴇz ᴄᴇ ʙᴏᴛ ᴘᴏᴜʀ ʀᴇɴᴏᴍᴍᴇʀ ᴇᴛ ᴍᴏᴅɪғɪᴇʀ ʟᴀ ᴠɪɢɴᴇᴛᴛᴇ ᴅᴇ ᴠᴏs ғɪᴄʜɪᴇʀs.
 
-    ➻ ᴠᴏᴜs ᴘᴏᴜᴠᴇᴢ ᴇ́ɢᴀʟᴇᴍᴇɴᴛ ᴄᴏɴᴠᴇʀᴛɪʀ ᴜɴᴇ ᴠɪᴅᴇ́ᴏ ᴇɴ ғɪᴄʜɪᴇʀ ᴇᴛ ᴠɪᴄᴇ ᴠᴇʀsᴀ.
+    ➻ ᴠᴏᴜs ᴘᴏᴜᴠᴇᴢ ᴇ́ɢᴀʟᴇᴍᴇNT ᴄᴏɴᴠᴇʀᴛɪʀ ᴜɴᴇ ᴠɪᴅᴇ́ᴏ ᴇɴ ғɪᴄʜɪᴇʀ ᴇᴛ ᴠɪᴄᴇ ᴠᴇʀsᴀ.
 
     ➻ ᴄᴇ ʙᴏᴛ ᴘʀᴇɴᴅ ᴇɴ ᴄʜᴀʀɢᴇ ʟᴇs ᴠɪɢɴᴇᴛᴛᴇs ᴇᴛ ʟᴇs ʟᴇ́ɢᴇɴᴅᴇs ᴘᴇʀsᴏɴɴᴀʟɪsᴇ́ᴇs.
     ʙᴏᴛ ᴄʀᴇ́ᴇ́ ᴘᴀʀ @sperot228.
@@ -111,15 +111,12 @@ flask_app = Flask('')
 def home():
     return "Bot en ligne et actif 24h/24 !"
 
-def start_pyrogram():
-    """Exécution isolée et sécurisée du client Telegram"""
-    asyncio.set_event_loop(asyncio.new_event_loop())
-    print("🚀 Initialisation de Pyrogram...")
-    try:
-        app.run()
-    except Exception as e:
-        print(f"Erreur Pyrogram critique : {e}")
-        sys.exit(1)
+# Lancement automatique de l'écoute du bot dès l'importation par Gunicorn
+try:
+    loop = asyncio.get_event_loop()
+except RuntimeError:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
-# Lancement immédiat du thread d'arrière-plan
-threading.Thread(target=start_pyrogram, daemon=True).start()
+print("🚀 Lancement asynchrone sécurisé de Pyrogram...")
+loop.create_task(app.start())
