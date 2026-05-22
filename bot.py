@@ -2,6 +2,7 @@ import os
 import time
 import asyncio
 import threading
+import sys
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
 from flask import Flask
@@ -111,10 +112,14 @@ def home():
     return "Bot en ligne et actif 24h/24 !"
 
 def start_pyrogram():
-    """Fonction isolée lancée en arrière-plan pour exécuter la boucle Telegram"""
+    """Exécution isolée et sécurisée du client Telegram"""
     asyncio.set_event_loop(asyncio.new_event_loop())
-    print("🚀 Initialisation asynchrone sécurisée de Pyrogram...")
-    app.run()
+    print("🚀 Initialisation de Pyrogram...")
+    try:
+        app.run()
+    except Exception as e:
+        print(f"Erreur Pyrogram critique : {e}")
+        sys.exit(1)
 
-# Démarrage forcé de l'écoute du bot dès que Gunicorn importe ce fichier
+# Lancement immédiat du thread d'arrière-plan
 threading.Thread(target=start_pyrogram, daemon=True).start()
