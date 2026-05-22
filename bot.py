@@ -1,16 +1,14 @@
 import os
 import time
-import sys
 import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
 from flask import Flask
-import threading
 
 # ==================== CONFIGURATION (VRAIS CODES) ====================
-API_ID = 35394497        # Ligne 11 : Vos chiffres uniques
-API_HASH = "890bcd6bb51422b9bdce8aa65566889e" # Ligne 12 : Votre hash
-BOT_TOKEN = "8937126319:AAGOCmCpLstnI0o7FzbVg5TUA61sq2ohrf8" # Ligne 13 : Votre token BotFather
+API_ID = 35394497        # Vos chiffres uniques insérés
+API_HASH = "890bcd6bb51422b9bdce8aa65566889e" # Votre hash inséré
+BOT_TOKEN = "8937126319:AAGOCmCpLstnI0o7FzbVg5TUA61sq2ohrf8" # Votre token BotFather inséré
 # ====================================================================
 
 app = Client("my_rename_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
@@ -21,12 +19,12 @@ user_thumbs = {}
 START_TEXT = """
 ᴄᴇᴄɪ ᴇsᴛ ᴜɴ ʙᴏᴛ ᴘᴜɪssᴀɴᴛ ᴅᴇ ʀᴇɴᴏᴍᴍᴀɢᴇ.
 
-    ➻ ᴜᴛɪʟɪsᴇz ᴄᴇ ʙᴏᴛ ᴘᴏᴜʀ ʀᴇɴᴏᴍᴍᴇʀ ᴇᴛ ᴍᴏᴅɪғɪᴇʀ ʟᴀ ᴠɪɢɴᴇᴛᴛᴇ ᴅᴇ ᴠᴏs ғɪᴄʜɪᴇ r s.
+    ➻ ᴜᴛɪʟɪsᴇz ᴄᴇ ʙᴏᴛ ᴘᴏᴜʀ ʀᴇɴᴏᴍᴍᴇʀ ᴇᴛ ᴍᴏᴅɪғɪᴇʀ ʟᴀ ᴠɪɢɴᴇᴛᴛᴇ ᴅᴇ ᴠᴏs ғɪᴄʜɪᴇʀs.
 
     ➻ ᴠᴏᴜs ᴘᴏᴜᴠᴇᴢ ᴇ́ɢᴀʟᴇᴍᴇɴᴛ ᴄᴏɴᴠᴇʀᴛɪʀ ᴜɴᴇ ᴠɪᴅᴇ́ᴏ ᴇɴ ғɪᴄʜɪᴇʀ ᴇᴛ ᴠɪᴄᴇ ᴠᴇʀsᴀ.
 
     ➻ ᴄᴇ ʙᴏᴛ ᴘʀᴇɴᴅ ᴇɴ ᴄʜᴀʀɢᴇ ʟᴇs ᴠɪɢɴᴇᴛᴛᴇs ᴇᴛ ʟᴇs ʟᴇ́ɢᴇɴᴅᴇs ᴘᴇʀsᴏɴɴᴀʟɪsᴇ́ᴇs.
-    ʙᴏᴛ ᴄʀᴇ́ᴇ́ ᴘᴀʀ @sperot228
+    ʙᴏᴛ ᴄʀᴇ́ᴇ́ ᴘᴀʀ @sperot228.
 """
 
 @app.on_message(filters.command("start") & filters.private)
@@ -44,13 +42,11 @@ async def save_thumb(client, message):
 async def file_handler(client, message):
     file = message.document or message.video or message.audio
     user_id = message.from_user.id
-    
     user_files[user_id] = {
         "file_id": file.file_id,
         "file_name": file.file_name,
         "type": "video" if message.video else ("audio" if message.audio else "document")
     }
-
     buttons = [
         [InlineKeyboardButton("✏️ Renommer le fichier", callback_data="rename")],
         [InlineKeyboardButton("🎬 Mode Vidéo", callback_data="type_video"),
@@ -68,7 +64,6 @@ async def callback_handler(client, query):
     if user_id not in user_files:
         await query.answer("❌ Erreur. Renvoyez le fichier.", show_alert=True)
         return
-
     if query.data == "rename":
         await query.message.delete()
         await query.message.reply_text(
@@ -87,24 +82,19 @@ async def rename_process(client, message):
     user_id = message.from_user.id
     if user_id not in user_files or not message.reply_to_message:
         return
-        
     new_name = message.text
     file_info = user_files[user_id]
     status_msg = await message.reply_text("⚡ **Téléchargement en cours...**")
-    
     file_path = await client.download_media(file_info["file_id"])
     directory = os.path.dirname(file_path)
     new_file_path = os.path.join(directory, new_name)
     os.rename(file_path, new_file_path)
-    
     await status_msg.edit("⬆️ **Envoi en cours vers Telegram...**")
     thumb = user_thumbs.get(user_id, None)
-    
     if file_info["type"] == "video":
         await client.send_video(chat_id=message.chat.id, video=new_file_path, caption=f"✅ `{new_name}`", thumb=thumb)
     else:
         await client.send_document(chat_id=message.chat.id, document=new_file_path, caption=f"✅ `{new_name}`", thumb=thumb)
-        
     try:
         os.remove(new_file_path)
     except:
@@ -112,27 +102,19 @@ async def rename_process(client, message):
     await status_msg.delete()
     del user_files[user_id]
 
-# --- FLASK WEB SERVER ---
+# --- ADAPTATION SÉCURISÉE POUR RENDRE DU PRODUCTION ---
 flask_app = Flask('')
 
 @flask_app.route('/')
 def home():
-    return "Bot actif et en cours d'execution 24h/24 !"
+    return "Bot actif 24h/24 !"
 
-def run_flask():
+# Lancement asynchrone de Pyrogram et démarrage du serveur Flask local
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    print("🚀 Lancement asynchrone de Pyrogram...")
+    loop.create_task(app.start())
+    
+    # Récupération du port dynamique pour l'hébergement cloud
     port = int(os.environ.get("PORT", 10000))
     flask_app.run(host='0.0.0.0', port=port)
-
-async def main():
-    t = threading.Thread(target=run_flask)
-    t.daemon = True
-    t.start()
-    
-    print("🚀 Initialisation du bot Pyrogram...")
-    await app.start()
-    print("🚀 Bot en ligne sur Telegram !")
-    await asyncio.Event().wait()
-
-if __name__ == "__main__":
-    asyncio.run(main())
-
