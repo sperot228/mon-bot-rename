@@ -1,14 +1,17 @@
 import os
 import time
 import sys
+import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
+from flask import Flask
+import threading
 
-# ==================== CONFIGURATION  ====================
-     API_ID = 2847104 # 
-API_HASH = "8f4be8c8651a2d592471b01c43b8a1a3" # 
-BOT_TOKEN = "7492018402:AAH_jK9xLLpW-m1N7UzOQ2pX4b_v4M1" # 
-# ====================================================================================
+# ==================== CONFIGURATION (VRAIS CODES) ====================
+API_ID = 35394497        # Ligne 11 : Vos chiffres uniques
+API_HASH = "890bcd6bb51422b9bdce8aa65566889e" # Ligne 12 : Votre hash
+BOT_TOKEN = "8937126319:AAGOCmCpLstnI0o7FzbVg5TUA61sq2ohrf8" # Ligne 13 : Votre token BotFather
+# ====================================================================
 
 app = Client("my_rename_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
@@ -17,8 +20,8 @@ user_thumbs = {}
 
 START_TEXT = """
 ᴄᴇᴄɪ ᴇsᴛ ᴜɴ ʙᴏᴛ ᴘᴜɪssᴀɴᴛ ᴅᴇ ʀᴇɴᴏᴍᴍᴀɢᴇ.
- 
-    ➻ ᴜᴛɪʟɪsᴇz ᴄᴇ ʙᴏᴛ ᴘᴏᴜʀ ʀᴇɴᴏᴍᴍᴇʀ ᴇᴛ ᴍᴏᴅɪғɪᴇʀ ʟᴀ ᴠɪɢɴᴇᴛᴛᴇ ᴅᴇ ᴠᴏs ғɪᴄʜɪᴇʀs.
+
+    ➻ ᴜᴛɪʟɪsᴇz ᴄᴇ ʙᴏᴛ ᴘᴏᴜʀ ʀᴇɴᴏᴍᴍᴇʀ ᴇᴛ ᴍᴏᴅɪғɪᴇʀ ʟᴀ ᴠɪɢɴᴇᴛᴛᴇ ᴅᴇ ᴠᴏs ғɪᴄʜɪᴇ r s.
 
     ➻ ᴠᴏᴜs ᴘᴏᴜᴠᴇᴢ ᴇ́ɢᴀʟᴇᴍᴇɴᴛ ᴄᴏɴᴠᴇʀᴛɪʀ ᴜɴᴇ ᴠɪᴅᴇ́ᴏ ᴇɴ ғɪᴄʜɪᴇʀ ᴇᴛ ᴠɪᴄᴇ ᴠᴇʀsᴀ.
 
@@ -109,25 +112,27 @@ async def rename_process(client, message):
     await status_msg.delete()
     del user_files[user_id]
 
-# --- LOGIQUE SERVEUR COMPATIBILITÉ RENDER ---
-from flask import Flask
-import threading
-
+# --- FLASK WEB SERVER ---
 flask_app = Flask('')
 
 @flask_app.route('/')
 def home():
-    return "Bot actif !"
+    return "Bot actif et en cours d'execution 24h/24 !"
 
 def run_flask():
-    try:
-        flask_app.run(host='0.0.0.0', port=10000)
-    except Exception as e:
-        print(f"Flask Error: {e}")
+    port = int(os.environ.get("PORT", 10000))
+    flask_app.run(host='0.0.0.0', port=port)
 
-if __name__ == "__main__":
+async def main():
     t = threading.Thread(target=run_flask)
     t.daemon = True
     t.start()
-    time.sleep(1)
-    app.run()
+    
+    print("🚀 Initialisation du bot Pyrogram...")
+    await app.start()
+    print("🚀 Bot en ligne sur Telegram !")
+    await asyncio.Event().wait()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
