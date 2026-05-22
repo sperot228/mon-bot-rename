@@ -126,5 +126,23 @@ async def rename_process(client, message):
     await status_msg.delete()
     del user_files[user_id]
 
+# --- AJOUT POUR COMPATIBILITÉ RENDER GRATUIT ---
+from flask import Flask
+import threading
+
+flask_app = Flask('')
+
+@flask_app.route('/')
+def home():
+    return "Bot en ligne !"
+
+def run_flask():
+    flask_app.run(host='0.0.0.0', port=10000)
+
+# Lance le serveur web en arrière-plan
+threading.Thread(target=run_flask).start()
+# -----------------------------------------------
+
 print("🚀 Bot Pyrogram connecté et prêt à l'action !")
 app.run()
+
