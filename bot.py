@@ -126,9 +126,10 @@ async def rename_process(client, message):
     await status_msg.delete()
     del user_files[user_id]
 
-# --- AJOUT POUR COMPATIBILITÉ RENDER GRATUIT ---
+# --- LOGIQUE FLASK ET SÉCURITÉ DE DÉMARRAGE ---
 from flask import Flask
 import threading
+import sys
 
 flask_app = Flask('')
 
@@ -137,12 +138,27 @@ def home():
     return "Bot en ligne !"
 
 def run_flask():
-    flask_app.run(host='0.0.0.0', port=10000)
+    try:
+        # Utilise le port 10000 requis par défaut sur Render
+        flask_app.run(host='0.0.0.0', port=10000)
+    except Exception as e:
+        print(f"Erreur Flask: {e}")
 
-# Lance le serveur web en arrière-plan
-threading.Thread(target=run_flask).start()
-# -----------------------------------------------
+if __name__ == "__main__":
+    # 1. Lance le serveur web Flask dans un thread séparé
+    t = threading.Thread(target=run_flask)
+    t.daemon = True
+    t.start()
+    
+    # 2. Laisse une seconde à Flask pour s'initialiser
+    time.sleep(1)
+    
+    # 3. Lance le bot Telegram principal
+    print("🚀 Bot Pyrogram connecté et prêt à l'action !")
+    try:
+        app.run()
+    except Exception as e:
+        print(f"Erreur Pyrogram critique : {e}")
+        sys.exit(1)
 
-print("🚀 Bot Pyrogram connecté et prêt à l'action !")
-app.run()
 
