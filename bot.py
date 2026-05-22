@@ -1,14 +1,15 @@
 import os
 import time
 import asyncio
+import threading
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
 from flask import Flask
 
-# ==================== CONFIGURATION (VRAIS CODES) ====================
-API_ID = 35394497        # Vos chiffres uniques insérés
-API_HASH = "890bcd6bb51422b9bdce8aa65566889e" # Votre hash inséré
-BOT_TOKEN = "8937126319:AAGOCmCpLstnI0o7FzbVg5TUA61sq2ohrf8" # Votre token BotFather inséré
+# ==================== CONFIGURATION SUIVANT VOS CODES ====================
+API_ID = 35394497        
+API_HASH = "890bcd6bb51422b9bdce8aa65566889e" 
+BOT_TOKEN = "8937126319:AAGOCmCpLstnI0o7FzbVg5TUA61sq2ohrf8" 
 # ====================================================================
 
 app = Client("my_rename_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
@@ -102,19 +103,18 @@ async def rename_process(client, message):
     await status_msg.delete()
     del user_files[user_id]
 
-# --- ADAPTATION SÉCURISÉE POUR RENDRE DU PRODUCTION ---
+# --- ARCHITECTURE SERVEUR WSGI FLASK POUR GUNICORN ---
 flask_app = Flask('')
 
 @flask_app.route('/')
 def home():
-    return "Bot actif 24h/24 !"
+    return "Bot en ligne et actif 24h/24 !"
 
-# Lancement asynchrone de Pyrogram et démarrage du serveur Flask local
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    print("🚀 Lancement asynchrone de Pyrogram...")
-    loop.create_task(app.start())
-    
-    # Récupération du port dynamique pour l'hébergement cloud
-    port = int(os.environ.get("PORT", 10000))
-    flask_app.run(host='0.0.0.0', port=port)
+def start_pyrogram():
+    """Fonction isolée lancée en arrière-plan pour exécuter la boucle Telegram"""
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    print("🚀 Initialisation asynchrone sécurisée de Pyrogram...")
+    app.run()
+
+# Démarrage forcé de l'écoute du bot dès que Gunicorn importe ce fichier
+threading.Thread(target=start_pyrogram, daemon=True).start()
